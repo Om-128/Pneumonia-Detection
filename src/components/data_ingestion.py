@@ -20,6 +20,7 @@ class DataIngestionConfig:
     Converts these datasets into TFRecords format for efficient storage.
     Saves the TFRecords to data paths for train, test, and validation sets.
     Returns the paths to these saved datasets for later use.
+    
 '''
 class DataIngestion:
     def __init__(self):
@@ -68,8 +69,4 @@ class DataIngestion:
 
         except Exception as e:
             raise CustomException(e, sys)
-
-if __name__ == "__main__":
-    obj = DataIngestion()
-    obj.initiate_data_ingestion()
 

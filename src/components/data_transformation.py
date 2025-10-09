@@ -65,7 +65,7 @@ class DataTransformation:
             if augment:
                 dataset = dataset.map(self.augment, num_parallel_calls=tf.data.AUTOTUNE)
 
-            dataset = dataset.batch(self.batch_size).prefetch(tf.data.AUTOTUNE)
+            dataset = dataset.prefetch(tf.data.AUTOTUNE)
 
             return dataset
 
@@ -92,3 +92,4 @@ class ImageTransformation:
         image = tf.image.resize(image, [self.img_height, self.img_width]) #Resize
         image = image / 255.0                                         # Normalize
         return image
+        print("Image processed successfully")

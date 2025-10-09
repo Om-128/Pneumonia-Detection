@@ -3,6 +3,7 @@ import sys
 
 from src.components.data_ingestion import DataIngestionConfig, DataIngestion
 from src.components.data_transformation import DataTransformation, ImageTransformation
+from src.components.model_trainer import ModelTrainerConfig, ModelTrainer
 from src.utils import save_preprocessor, load_preprocessor
 
 import pickle
@@ -36,9 +37,17 @@ def train_pipeline():
         save_preprocessor(dataset_preprocessor, "artifacts/dataset_preprocessor.pkl")
         save_preprocessor(image_preprocessor, "artifacts/image_preprocessor.pkl")
 
-        return train_ds, val_ds, test_ds, dataset_preprocessor, image_preprocessor
+        # Step 4 — Model Training
+        model = ModelTrainer()
+        model, history = model.train_model(train_ds, val_ds)
+
+        for key, values in history.history.items():
+            print(f"{key}: {values}")
+
+        return model, history, train_ds, val_ds, test_ds, dataset_preprocessor, image_preprocessor
+
     except Exception as e:
         raise CustomException(e, sys)
 
 if __name__ == "__main__":
-    train_ds, val_ds, test_ds, dataset_preprocessor, image_preprocessor = train_pipeline()
+    history, model, train_ds, val_ds, test_ds, dataset_preprocessor, image_preprocessor = train_pipeline()

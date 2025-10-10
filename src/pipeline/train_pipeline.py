@@ -2,11 +2,13 @@ import os
 import sys
 
 from src.components.data_ingestion import DataIngestionConfig, DataIngestion
-from src.components.data_transformation import DataTransformation, ImageTransformation
+from src.components.data_transformation import ImageTransformation
 from src.components.model_trainer import ModelTrainerConfig, ModelTrainer
 from src.utils import save_preprocessor, load_preprocessor
+from tensorflow.keras.applications.resnet50 import preprocess_input
 
 import pickle
+import tensorflow as tf
 
 from src.exception import CustomException
 
@@ -23,31 +25,58 @@ def train_pipeline():
 
         # Step 1 — Data Ingestion
         data_ingestion = DataIngestion()
-        train_path, test_path, val_path = data_ingestion.initiate_data_ingestion()
+        train_path, test_path = data_ingestion.initiate_data_ingestion()
+
+        # Step 2️⃣ — Create Train/Val Split from Train Folder
+        print("\n📂 Creating training & validation datasets...")
+
+        train_ds = tf.keras.utils.image_dataset_from_directory(
+            train_path,
+            image_size=(224, 224),
+            batch_size=32,
+            validation_split=0.2,
+            subset='training',
+            seed=42
+        )
+
+        val_ds = tf.keras.utils.image_dataset_from_directory(
+            train_path,
+            image_size=(224, 224),
+            batch_size=32,
+            validation_split=0.2,
+            subset='validation',
+            seed=42
+        )
+
+        test_ds = tf.keras.utils.image_dataset_from_directory(
+            test_path,
+            image_size=(224, 224),
+            batch_size=32,
+            shuffle=False
+        )
 
         # Step 2 — Data Preprocessing
-        dataset_preprocessor = DataTransformation()
-        train_ds = dataset_preprocessor.preprocess_data(train_path, augment=True)
-        test_ds = dataset_preprocessor.preprocess_data(test_path, augment=False)
-        val_ds = dataset_preprocessor.preprocess_data(val_path, augment=False)
+        print("\n🔧 Applying preprocessing...")
+        train_ds = train_ds.map(lambda x, y: (preprocess_input(x), y))
+        val_ds = val_ds.map(lambda x, y: (preprocess_input(x), y))
+        test_ds = test_ds.map(lambda x, y: (preprocess_input(x), y))
 
-        image_preprocessor = ImageTransformation()
-
+        train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
+        val_ds = val_ds.prefetch(tf.data.AUTOTUNE)
+        test_ds = test_ds.prefetch(tf.data.AUTOTUNE)
+        
         # Step 3 — Save preprocessors
-        save_preprocessor(dataset_preprocessor, "artifacts/dataset_preprocessor.pkl")
+        image_preprocessor = ImageTransformation()
         save_preprocessor(image_preprocessor, "artifacts/image_preprocessor.pkl")
 
         # Step 4 — Model Training
         model = ModelTrainer()
         model, history = model.train_model(train_ds, val_ds)
-
-        for key, values in history.history.items():
-            print(f"{key}: {values}")
-
-        return model, history, train_ds, val_ds, test_ds, dataset_preprocessor, image_preprocessor
+        
+        return history, model, train_ds, val_ds, test_ds, image_preprocessor
 
     except Exception as e:
         raise CustomException(e, sys)
 
 if __name__ == "__main__":
-    history, model, train_ds, val_ds, test_ds, dataset_preprocessor, image_preprocessor = train_pipeline()
+    history, model, train_ds, val_ds, test_ds, image_preprocessor = train_pipeline()

@@ -24,49 +24,18 @@ class DataIngestionConfig:
 '''
 class DataIngestion:
     def __init__(self):
-        self.ingestion_config = DataIngestionConfig()
+        self.config = DataIngestionConfig()
 
     def initiate_data_ingestion(self):
         try:
-            train_img_data_path = os.path.join(self.ingestion_config.base_dir, "train")
-            test_img_data_path = os.path.join(self.ingestion_config.base_dir, "test")
-            val_img_data_path = os.path.join(self.ingestion_config.base_dir, "val")
-            
-            #Load train data
-            train_data = image_dataset_from_directory(
-                train_img_data_path,
-                image_size=(self.ingestion_config.img_height, self.ingestion_config.img_width),
-                batch_size=self.ingestion_config.batch_size,
-                label_mode='binary'
-            )
+            train_path = os.path.join(self.config.base_dir, "train")
+            test_path = os.path.join(self.config.base_dir, "test")
+            val_path = os.path.join(self.config.base_dir, "val")  # optional if available
 
-            #Load test data
-            test_data = image_dataset_from_directory(
-                test_img_data_path,
-                image_size=(self.ingestion_config.img_height, self.ingestion_config.img_width),
-                batch_size=self.ingestion_config.batch_size,
-                label_mode='binary'
-            )
+            if not os.path.exists(train_path) or not os.path.exists(test_path):
+                raise FileNotFoundError(f"Train/Test directories not found in {self.config.base_dir}")
 
-            #Load validation data
-            val_data = image_dataset_from_directory(
-                val_img_data_path,
-                image_size=(self.ingestion_config.img_height, self.ingestion_config.img_width),
-                batch_size=self.ingestion_config.batch_size,
-                label_mode='binary'
-            )
-
-            #Output Data Paths
-            train_data_path = os.path.join(self.ingestion_config.artifact_dir, "train")
-            test_data_path = os.path.join(self.ingestion_config.artifact_dir, "test")
-            val_data_path = os.path.join(self.ingestion_config.artifact_dir, "val")
-
-            save_data(train_data, train_data_path)
-            save_data(test_data, test_data_path)
-            save_data(val_data, val_data_path)
-
-            return train_data_path, test_data_path, val_data_path
+            return train_path, test_path
 
         except Exception as e:
             raise CustomException(e, sys)
-

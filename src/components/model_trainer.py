@@ -81,42 +81,15 @@ class ModelTrainer:
                 verbose=1
             )
 
-            # Checkpoint Saving
-            checkpoint_cb = tf.keras.callbacks.ModelCheckpoint(
-                filepath=self.config.model_path,
-                monitor='val_accuracy',
-                save_best_only=True,
-                verbose=1
-            )
-
             history = model.fit(
                 train_ds,
                 validation_data = val_ds,
                 epochs = self.config.epochs,
-                callbacks=[early_stop, lr_scheduler, checkpoint_cb]
+                callbacks=[early_stop, lr_scheduler]
             )
-
-            # print("\n🔧 Unfreezing top layers for fine-tuning...")
-            # for layer in model.layers[-self.config.fine_tune_layers:]:
-            #     if hasattr(layer, "trainable"):
-            #         layer.trainable = True
-
-            # model.compile(
-            #     optimizer=tf.keras.optimizers.Adam(learning_rate=1e-5),
-            #     loss='binary_crossentropy',
-            #     metrics=['accuracy']
-            # )
-
-            # history2 = model.fit(
-            #     train_ds,
-            #     validation_data=val_ds,
-            #     epochs=5,
-            #     callbacks=[early_stop, lr_scheduler]
-            # )
-
-            # history = {}
-            # for k in history1.history.keys():
-            #     history[k] = history1.history[k] + history2.history.get(k, [])
+            
+            os.makedirs(os.path.dirname(self.config.model_path), exist_ok=True)
+            model.save(self.config.model_path)
 
             return model, history
 

@@ -28,7 +28,7 @@ def save_preprocessor(preprocessor, path):
         pickle.dump(preprocessor, f)
     print(f"✅ Preprocessor saved at {path}")
 
-def load_preprocessor(path="artifacts/preprocessor.pkl"):
+def load_preprocessor(path):
     """
     Load a saved preprocessor object.
     

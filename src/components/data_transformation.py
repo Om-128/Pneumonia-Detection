@@ -16,6 +16,10 @@ class ImageTransformation:
             image = tf.image.decode_jpeg(image, channels=3)
             image = tf.image.resize(image, [self.img_height, self.img_width])
             image = image / 255.0
+
+            #Add batch dimension
+            image = tf.expand_dims(image, axis=0)
             return image
+
         except Exception as e:
             raise CustomException(e, sys)

@@ -73,6 +73,8 @@ def train_pipeline():
         model = ModelTrainer()
         model, history = model.train_model(train_ds, val_ds)
         
+        print(history)
+        
         return history, model, train_ds, val_ds, test_ds, image_preprocessor
 
     except Exception as e:

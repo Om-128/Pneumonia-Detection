@@ -4,12 +4,13 @@ import tensorflow as tf
 from dataclasses import dataclass
 from src.exception import CustomException
 import numpy as np
+from sklearn.utils import class_weight
 
 
 class ModelTrainerConfig:
     model_path = os.path.join("artifacts", "model.h5")
     epochs : int = 10
-    learning_rate : float = 0.0001
+    learning_rate : float = 1e-4
     dropout_rate : float = 0.6
     fine_tune_layers: int = 30
 
@@ -65,6 +66,18 @@ class ModelTrainer:
         try:
             model = self.build_model()
 
+            labels = np.concatenate([y.numpy() for x, y in train_ds], axis=0)
+
+            class_weights_array = class_weight.compute_class_weight(
+                class_weight='balanced',
+                classes=np.unique(labels),
+                y=labels
+            )
+
+            class_weights = dict(enumerate(class_weights_array))
+
+            print("Class weights:", class_weights)
+
             # Early stopping callback
             early_stop = tf.keras.callbacks.EarlyStopping(
                 monitor="val_loss",
@@ -85,8 +98,10 @@ class ModelTrainer:
                 train_ds,
                 validation_data = val_ds,
                 epochs = self.config.epochs,
-                callbacks=[early_stop, lr_scheduler]
+                callbacks=[early_stop, lr_scheduler],
+                class_weight=class_weights
             )
+
             
             os.makedirs(os.path.dirname(self.config.model_path), exist_ok=True)
             model.save(self.config.model_path)

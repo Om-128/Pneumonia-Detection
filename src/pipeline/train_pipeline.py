@@ -39,6 +39,9 @@ def train_pipeline():
             seed=42
         )
 
+        train_ds = train_ds.shuffle(buffer_size=1000).map(lambda x, y: (preprocess_input(x), y)).prefetch(tf.data.AUTOTUNE)
+
+
         val_ds = tf.keras.utils.image_dataset_from_directory(
             train_path,
             image_size=(224, 224),
@@ -57,11 +60,9 @@ def train_pipeline():
 
         # Step 2 — Data Preprocessing
         print("\n🔧 Applying preprocessing...")
-        train_ds = train_ds.map(lambda x, y: (preprocess_input(x), y))
         val_ds = val_ds.map(lambda x, y: (preprocess_input(x), y))
         test_ds = test_ds.map(lambda x, y: (preprocess_input(x), y))
 
-        train_ds = train_ds.prefetch(tf.data.AUTOTUNE)
         val_ds = val_ds.prefetch(tf.data.AUTOTUNE)
         test_ds = test_ds.prefetch(tf.data.AUTOTUNE)
         
@@ -82,3 +83,4 @@ def train_pipeline():
 
 if __name__ == "__main__":
     history, model, train_ds, val_ds, test_ds, image_preprocessor = train_pipeline()
+

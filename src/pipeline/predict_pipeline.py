@@ -42,8 +42,10 @@ class PredictPipeline:
 if __name__ == "__main__":
     config = PredictPipelineConfig()
     predict_pipeline = PredictPipeline(config=config)
-    result = predict_pipeline.predict('normal3.jpeg')
+    result = predict_pipeline.predict('Left Upper Lobe Pneumonia.jpg')
     if result > 0.5:
         print("Prediction: Pneumonia")
     else:
         print("Prediction: Normal")
+
+

@@ -9,3 +9,4 @@ streamlit
 Pillow
 Flask
 flask-cors
+gunicorn

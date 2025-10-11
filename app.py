@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from src.pipeline.predict_pipeline import PredictPipeline, PredictPipelineConfig
 from src.exception import CustomException
 import sys
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 app = Flask(__name__)
 CORS(app)

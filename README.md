@@ -27,11 +27,11 @@ The dataset contains a class imbalance, with Pneumonia images being more than tw
 During development, we faced several challenges:
 
 1. **Class Imbalance**:
-   - The dataset has more Pneumonia images than Normal images, which led the model to predict Pneumonia more often.
+   - The dataset has more Pneumonia images than Normal images, which initially caused the model to predict Pneumonia most of the time.
 2. **Overfitting**:
    - Initially, the model achieved high training accuracy but low validation accuracy due to overfitting.
 3. **Model not predicting NORMAL**:
-   - Early attempts without proper preprocessing, class weights, and shuffling caused the model to predict Pneumonia for almost every test image.
+   - Early attempts without proper preprocessing, shuffling, and class weights caused the model to predict Pneumonia for almost every test image.
 
 ---
 
@@ -40,17 +40,14 @@ To address these challenges, we implemented the following techniques:
 
 1. **Transfer Learning**:
    - Used **ResNet50** pretrained on **ImageNet**.
-   - The base model weights were initially frozen and fine-tuned later if required.
+   - Base model weights were frozen initially to prevent overfitting.
    
 2. **Data Augmentation**:
    - Added random flips, rotations, and zoom to reduce overfitting and improve generalization.
    
-3. **Class Weights**:
-   - Computed class weights to handle imbalance:
-     ```python
-     {0: 1.91, 1: 0.68}  # NORMAL, PNEUMONIA
-     ```
-   - Applied these weights during training to improve prediction for the minority class.
+3. **Dynamic Class Weights**:
+   - Computed class weights automatically from the training dataset using `sklearn.utils.class_weight`.
+   - These weights were applied during training to handle class imbalance.
 
 4. **Preprocessing**:
    - Applied `preprocess_input` from `tf.keras.applications.resnet50` to standardize images.
@@ -67,7 +64,7 @@ To address these challenges, we implemented the following techniques:
 7. **Pipeline Structure**:
    - **Data Ingestion**: Load images and split into training, validation, and test sets.
    - **Data Transformation**: Preprocess images and save a reusable preprocessor.
-   - **Model Training**: Build ResNet50-based model and train with class weights.
+   - **Model Training**: Build ResNet50-based model and train with dynamic class weights.
    - **Prediction Pipeline**: Load trained model and preprocessor for inference on new images.
 
 ---

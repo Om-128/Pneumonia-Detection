@@ -5,7 +5,6 @@ __pycache__/
 
 #Ignore Data Folder
 data/
-artifacts/
 
 # C extensions
 *.so

@@ -1,27 +1,21 @@
-from flask import Flask, request, jsonify, render_template, url_for
-from flask_cors import CORS
 import os
-from werkzeug.utils import secure_filename
-from src.pipeline.predict_pipeline import PredictPipeline, PredictPipelineConfig
-from src.exception import CustomException
 import sys
+from flask import Flask, request, jsonify, render_template
+from werkzeug.utils import secure_filename
+from src.exception import CustomException
 
 # Disable GPU (Render doesn't have one)
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-app = Flask(__name__)
-CORS(app)
-
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Load model and preprocessor ONCE globally
-predict_config = PredictPipelineConfig()
-predict_pipeline = PredictPipeline(predict_config)
+app = Flask(__name__)
+CORS(app)   
 
 @app.route("/")
 def home():
-    return render_template("index.html")  # <- render_template instead of jsonify
+    return render_template("index.html")  # <- render_template
 
 @app.route("/predict", methods=["POST"])
 def predict():
@@ -42,7 +36,13 @@ def predict():
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
 
+        # Lazy import and prediction
+        from src.pipeline.predict_pipeline import PredictPipeline, PredictPipelineConfig
+        from tensorflow.keras.models import load_model
+
         #Make prediction
+        config = PredictPipelineConfig()
+        pipeline = PredictPipeline(config)
         prediction = predict_pipeline.predict(filepath)
 
         if prediction > 0.5:
@@ -58,9 +58,8 @@ def predict():
         })
 
     except Exception as e:
-        print("Error in /predict route:", str(e))
-        return jsonify({"error": "Something went wrong! Try again."}), 500
+        raise CustomException(e, sys)
 
 if __name__ == "__main__":
-    app.run(debug=True)
-    #89f7fe
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)

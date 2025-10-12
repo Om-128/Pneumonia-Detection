@@ -1,5 +1,6 @@
 import os
 import sys
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import tensorflow as tf
 import numpy as np
 from src.exception import CustomException
@@ -15,23 +16,29 @@ class PredictPipelineConfig:
 
 class PredictPipeline:
 
+    _model = None
+    _image_preprocessor = None
+
     def __init__(self, config: PredictPipelineConfig):
         self.config = config
-        self.model = load_model(config.model_path)
-    
-    def loadImagePreprocessor(self):
-        try:
-            if not os.path.exists(self.config.image_processor_path):
-                raise FileNotFoundError(f"Model file not found at {model_path}")
-            else:
-                return load_preprocessor(self.config.image_processor_path)
-        except Exception as e:
-            raise CustomException(e, sys)
+
+        #Loading model once
+        if PredictPipeline._model is None:
+            PredictPipeline._model = load_model(config.model_path)
+        
+        # Load preprocessor once globally
+        if PredictPipeline._image_preprocessor is None:
+            if not os.path.exists(config.image_processor_path):
+                raise FileNotFoundError(f"Image preprocessor not found at {config.image_processor_path}")
+            print("🔹 Loading preprocessor once...")
+            PredictPipeline._image_preprocessor = load_preprocessor(config.image_processor_path)
+
+        self.model = PredictPipeline._model
+        self.image_preprocessor = PredictPipeline._image_preprocessor
 
     def predict(self, img_path):
         try:
-            image_preprocessor = self.loadImagePreprocessor()
-            scaled_img = image_preprocessor.transform_image(img_path)
+            scaled_img = selfimage_preprocessor.transform_image(img_path)
             result = self.model.predict(scaled_img)[0][0]
             return result
         except Exception as e:

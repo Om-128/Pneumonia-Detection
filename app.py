@@ -5,6 +5,8 @@ from werkzeug.utils import secure_filename
 from src.pipeline.predict_pipeline import PredictPipeline, PredictPipelineConfig
 from src.exception import CustomException
 import sys
+
+# Disable GPU (Render doesn't have one)
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 app = Flask(__name__)
@@ -12,6 +14,10 @@ CORS(app)
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Load model and preprocessor ONCE globally
+predict_config = PredictPipelineConfig()
+predict_pipeline = PredictPipeline(predict_config)
 
 @app.route("/")
 def home():
@@ -37,8 +43,6 @@ def predict():
         file.save(filepath)
 
         #Make prediction
-        predict_pipeline_cofig = PredictPipelineConfig()
-        predict_pipeline = PredictPipeline(predict_pipeline_cofig)
         prediction = predict_pipeline.predict(filepath)
 
         if prediction > 0.5:
@@ -54,8 +58,9 @@ def predict():
         })
 
     except Exception as e:
-        raise CustomException(e, sys)
+        print("Error in /predict route:", str(e))
+        return jsonify({"error": "Something went wrong! Try again."}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
-    #89f7fe
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

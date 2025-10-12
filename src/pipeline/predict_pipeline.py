@@ -17,6 +17,7 @@ class PredictPipeline:
 
     def __init__(self, config: PredictPipelineConfig):
         self.config = config
+        self.model = load_model(config.model_path)
     
     def loadImagePreprocessor(self):
         try:
@@ -30,9 +31,8 @@ class PredictPipeline:
     def predict(self, img_path):
         try:
             image_preprocessor = self.loadImagePreprocessor()
-            model = load_model(self.config.model_path)
             scaled_img = image_preprocessor.transform_image(img_path)
-            result = model.predict(scaled_img)
+            result = self.model.predict(scaled_img)[0][0]
             return result
         except Exception as e:
             print(e)

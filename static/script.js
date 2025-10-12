@@ -38,22 +38,25 @@ predictBtn.addEventListener("click", async () => {
             body: formData
         });
 
+        // Check if response is OK
+        if (!response.ok) {
+            const text = await response.text(); // get raw response
+            throw new Error(`Server error: ${response.status}\n${text}`);
+        }
+
         const data = await response.json();
 
         if (data.error) {
             result.className = "result-pneumonia";
             result.textContent = data.error;
         } else {
-            // Apply class based on prediction
             const resultClass = data.prediction === "NORMAL" ? "result-normal" : "result-pneumonia";
             result.className = resultClass;
-
-            // Show prediction message
             result.innerHTML = `Prediction: ${data.prediction} <br> ${data.message}`;
         }
     } catch (err) {
         result.className = "result-pneumonia";
-        result.textContent = err.message;
-        console.error(err);
+        result.textContent = "Prediction failed. Check console.";
+        console.error("Fetch error:", err);
     }
 });

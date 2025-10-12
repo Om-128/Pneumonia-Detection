@@ -3,7 +3,6 @@ import sys
 from flask import Flask, request, jsonify, render_template
 from werkzeug.utils import secure_filename
 from src.exception import CustomException
-from flask_cors import CORS
 from src.pipeline.predict_pipeline import PredictPipeline, PredictPipelineConfig
 from tensorflow.keras.models import load_model
 
@@ -11,7 +10,6 @@ UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 app = Flask(__name__)
-CORS(app)   
 
 @app.route("/")
 def home():

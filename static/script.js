@@ -53,7 +53,7 @@ predictBtn.addEventListener("click", async () => {
         }
     } catch (err) {
         result.className = "result-pneumonia";
-        result.textContent = "Something went wrong! Try again.";
+        result.textContent = err.message;
         console.error(err);
     }
 });

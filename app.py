@@ -3,6 +3,9 @@ import sys
 from flask import Flask, request, jsonify, render_template
 from werkzeug.utils import secure_filename
 from src.exception import CustomException
+from flask_cors import CORS
+from src.pipeline.predict_pipeline import PredictPipeline, PredictPipelineConfig
+from tensorflow.keras.models import load_model
 
 # Disable GPU (Render doesn't have one)
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -36,14 +39,10 @@ def predict():
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
 
-        # Lazy import and prediction
-        from src.pipeline.predict_pipeline import PredictPipeline, PredictPipelineConfig
-        from tensorflow.keras.models import load_model
-
         #Make prediction
         config = PredictPipelineConfig()
         pipeline = PredictPipeline(config)
-        prediction = predict_pipeline.predict(filepath)
+        prediction = pipeline.predict(filepath)
 
         if prediction > 0.5:
             message = "You have symptoms of Pneumonia!"
@@ -61,5 +60,4 @@ def predict():
         raise CustomException(e, sys)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(debug=True)

@@ -2,6 +2,8 @@ import os
 import sys
 from dataclasses import dataclass
 from src.exception import CustomException
+from tensorflow.keras.models import load_model
+from src.utils import load_preprocessor
 
 @dataclass
 class PredictPipelineConfig:
@@ -16,14 +18,12 @@ class PredictPipeline:
     
     def load_model_lazy(self):
         if self.model is None:
-            from tensorflow.keras.models import load_model
             if not os.path.exists(self.config.model_path):
                 raise FileNotFoundError(f"Model file not found at {self.config.model_path}")
             self.model = load_model(self.config.model_path)
         return self.model
     
     def load_image_preprocessor(self):
-        from src.utils import load_preprocessor
         if not os.path.exists(self.config.image_processor_path):
             raise FileNotFoundError(f"Preprocessor not found at {self.config.image_processor_path}")
         return load_preprocessor(self.config.image_processor_path)

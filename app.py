@@ -59,7 +59,11 @@ if uploaded_file:
         # Show result centered
         if prediction > 0.7:
             st.markdown(
-                "<h3 style='text-align: center; color:red;'>⚠️ Prediction: Pneumonia detected!</h3>",
+                f"<h3 style='text-align: center; color:red;'>⚠️ Pneumonia detected!</h3>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                f"<p style='text-align: center; color:red;'>Confidence: {confidence:.2f}%</p>",
                 unsafe_allow_html=True
             )
             st.markdown(
@@ -68,10 +72,14 @@ if uploaded_file:
             )
         else:
             st.markdown(
-                "<h3 style='text-align: center; color:green;'>✅ Prediction: Normal</h3>",
+                f"<h3 style='text-align: center; color:green;'>✅ Normal</h3>",
                 unsafe_allow_html=True
             )
             st.markdown(
-                "<p style='text-align: center; color:green;'>Your X-ray is normal, Don't worry.</p>",
+                f"<p style='text-align: center; color:green;'>Confidence: {100 - confidence:.2f}%</p>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                "<p style='text-align: center; color:green;'>Your X-ray is normal. Don't worry.</p>",
                 unsafe_allow_html=True
             )

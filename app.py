@@ -1,58 +1,77 @@
-import os
-import sys
-from flask import Flask, request, jsonify, render_template
-from werkzeug.utils import secure_filename
-from src.exception import CustomException
+import streamlit as st
+import tempfile
+from PIL import Image
 from src.pipeline.predict_pipeline import PredictPipeline, PredictPipelineConfig
-from tensorflow.keras.models import load_model
+import io
 
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# -----------------------------
+# Page config
+# -----------------------------
+st.set_page_config(
+    page_title="Pneumonia Detection",
+    page_icon="🫁",
+    layout="centered"
+)
 
-app = Flask(__name__)
+# -----------------------------
+# Title and description
+# -----------------------------
+st.markdown("<h1 style='text-align: center;'>🫁 Pneumonia Detection</h1>", unsafe_allow_html=True)
+st.markdown(
+    "<p style='text-align: center;'>Upload a chest X-ray image and the model will predict if it shows signs of pneumonia.</p>",
+    unsafe_allow_html=True
+)
 
-@app.route("/")
-def home():
-    return render_template("index.html")  # <- render_template
+# -----------------------------
+# File uploader
+# -----------------------------
+uploaded_file = st.file_uploader("", type=["png", "jpg", "jpeg"])
 
-@app.route("/predict", methods=["POST"])
-def predict():
-    try:
-        if "image" not in request.files:
-            return jsonify({"error": "No image uploaded"}), 400
+if uploaded_file:
+    # Read file content once
+    file_bytes = uploaded_file.read()
+    image = Image.open(io.BytesIO(file_bytes))
 
-        file = request.files["image"]
-        if file.filename == "":
-            return jsonify({"error": "No file selected"}), 400
+    # Center image preview using columns
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        st.image(image, caption="Uploaded X-ray", width=300)
 
-        # Replace previous images
-        for old_file in os.listdir(UPLOAD_FOLDER):
-            os.remove(os.path.join(UPLOAD_FOLDER, old_file))
+    # Load pipeline once
+    config = PredictPipelineConfig()
+    pipeline = PredictPipeline(config)
 
-        #Save file
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(UPLOAD_FOLDER, filename)
-        file.save(filepath)
+    with col2:
+        predict = st.button("Predict", width=300, type="primary")
 
-        #Make prediction
-        config = PredictPipelineConfig()
-        pipeline = PredictPipeline(config)
-        prediction = pipeline.predict(filepath)
+    if predict:
+        with col2:
+            with st.spinner("Predicting... ⏳", width='stretch'):
+                # Save uploaded file to a temp file
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp:
+                    tmp.write(file_bytes)
+                    tmp_path = tmp.name
 
+                # Run prediction
+                prediction = pipeline.predict(tmp_path)
+
+                # Display result centered
+        # Show result centered
         if prediction > 0.5:
-            message = "You have symptoms of Pneumonia!"
-            label = "PNEUMONIA"
+            st.markdown(
+                "<h3 style='text-align: center; color:red;'>⚠️ Prediction: Pneumonia detected!</h3>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                "<p style='text-align: center; color:red;'>You have symptoms of Pneumonia! Please consult a doctor.</p>",
+                unsafe_allow_html=True
+            )
         else:
-            message = "Your X-ray is normal."
-            label = "NORMAL"
-
-        return jsonify({
-            "prediction": label,
-            "message": message
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
+            st.markdown(
+                "<h3 style='text-align: center; color:green;'>✅ Prediction: Normal</h3>",
+                unsafe_allow_html=True
+            )
+            st.markdown(
+                "<p style='text-align: center; color:green;'>Your X-ray is normal, Don't worry.</p>",
+                unsafe_allow_html=True
+            )

@@ -3,6 +3,9 @@
 ### 🔗 Live Demo  
 👉 [Try the App Here](https://pneumonia-prediction-app-om.streamlit.app/)
 
+## 🎥 Demo
+[Watch the Demo on YouTube](https://youtu.be/bcP7qmx-6s0)
+
 ---
 
 ## 📘 Overview

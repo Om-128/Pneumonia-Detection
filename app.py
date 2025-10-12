@@ -57,7 +57,7 @@ if uploaded_file:
 
                 # Display result centered
         # Show result centered
-        if prediction > 0.5:
+        if prediction > 0.7:
             st.markdown(
                 "<h3 style='text-align: center; color:red;'>⚠️ Prediction: Pneumonia detected!</h3>",
                 unsafe_allow_html=True

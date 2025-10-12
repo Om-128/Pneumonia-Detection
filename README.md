@@ -4,7 +4,7 @@
 👉 [Try the App Here](https://pneumonia-prediction-app-om.streamlit.app/)
 
 ## 🎥 Demo Video
-[![Watch the video](https://github.com/user-attachments/assets/6346952a-bc2c-433d-ba3b-a401fa173bc0)
+https://github.com/user-attachments/assets/6346952a-bc2c-433d-ba3b-a401fa173bc0
 
 
 ---

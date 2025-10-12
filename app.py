@@ -7,9 +7,6 @@ from flask_cors import CORS
 from src.pipeline.predict_pipeline import PredictPipeline, PredictPipelineConfig
 from tensorflow.keras.models import load_model
 
-# Disable GPU (Render doesn't have one)
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
-
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
@@ -57,7 +54,7 @@ def predict():
         })
 
     except Exception as e:
-        raise CustomException(e, sys)
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

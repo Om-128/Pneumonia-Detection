@@ -1,7 +1,7 @@
 # 🫁 Pneumonia Detection Using Transfer Learning
 
 ### 🔗 Live Demo  
-👉 [Try the App Here](https://pneumonia-prediction-app-om.streamlit.app/)
+👉 [Try the App Here](https://om-128-pneumonia-detection-app-me9vti.streamlit.app/)
 
 ## 🎥 Demo Video
 https://github.com/user-attachments/assets/6346952a-bc2c-433d-ba3b-a401fa173bc0

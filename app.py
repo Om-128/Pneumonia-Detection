@@ -63,20 +63,12 @@ if uploaded_file:
                 unsafe_allow_html=True
             )
             st.markdown(
-                f"<p style='text-align: center; color:red;'>Confidence: {confidence:.2f}%</p>",
-                unsafe_allow_html=True
-            )
-            st.markdown(
                 "<p style='text-align: center; color:red;'>You have symptoms of Pneumonia! Please consult a doctor.</p>",
                 unsafe_allow_html=True
             )
         else:
             st.markdown(
                 f"<h3 style='text-align: center; color:green;'>✅ Normal</h3>",
-                unsafe_allow_html=True
-            )
-            st.markdown(
-                f"<p style='text-align: center; color:green;'>Confidence: {100 - confidence:.2f}%</p>",
                 unsafe_allow_html=True
             )
             st.markdown(
